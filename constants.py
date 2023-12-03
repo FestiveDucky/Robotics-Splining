@@ -10,7 +10,6 @@ fullscreen = False
 # Automatically resizes everything for you
 ctypes.windll.user32.SetProcessDPIAware()
 WIDTH, HEIGHT = pygame.display.list_modes()[0]
-WIDTH, HEIGHT = 1170, 900
 
 # Will bug out on a resolution with a ratio less than 1.3:1
 

@@ -11,3 +11,6 @@ Controls:
 - o: adds an obstacle point
 - DELETE: removes an obstacle point
 - SPACE: Manually updates the screen
+
+
+Note if your device has a resolution of less than 1.3 (most people don't), it sucks to suck and this won't work properly :)
