@@ -2,6 +2,15 @@ Required Python Packages: Pygame, Pillow
 
 The save.txt file stores the saved state of your instance of the spline generator. The first line stores the resolution of your screen so that the points saved can be resized for different sizes, the second line stores the control points of the spline and the last line stores the obstacle points. I reccomend not to touch the obstacle points since they are already set up. In the worst case, there is a backup of the obstacles in the main.py file at the top.
 
+Guide:
+-
+- Run main.py and create your spline
+- Press e to export your points and press s to save your spline for later (if you want)
+- Then run "pointsConverter.py" (I will merge later) and that produces "points.h"
+- Put "points.h" in your auton folder with "skillsAuton.cpp"
+- Then just import the file and use the "points" array in your pursuit motion
+
+
 Controls:
 -
 - p: adds a new curve with the end point being at your mouse position
