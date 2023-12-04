@@ -232,7 +232,7 @@ if __name__ == '__main__':
                     coordinates, curvatures = c.getData()
                     with open("points.txt", "w") as fout:
                         # Get the first point (robot start) and make the rest of the points based of that
-                        start = points[0]
+                        start = c.points[0]
 
                         for i in range(len(coordinates)):
                             fout.write(
@@ -241,7 +241,7 @@ if __name__ == '__main__':
                     # Saves curve and obstacles to a file
                     with open("save.txt", "w") as f:
                         # We write out the height so that we can rescale the points for different resolutions
-                        f.write(HEIGHT)
+                        f.write(str(HEIGHT)+ "\n")
                         f.write(" ".join(list(map(str, list(chain.from_iterable(c.points))))) + "\n")
                         f.write(" ".join(list(map(str, list(chain.from_iterable(obstaclesPoints))))))
 

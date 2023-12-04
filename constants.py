@@ -34,7 +34,7 @@ FIELD_DIMENSION *= 12
 PPI = HEIGHT / FIELD_DIMENSION
 TRACKWIDTH = 18
 WHEELRADIUS = 1
-precision = 10
+precision = 100
 # speed = 0
 speed = 0.005
 
