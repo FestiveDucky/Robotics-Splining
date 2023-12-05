@@ -14,17 +14,9 @@ from robot import *
 # TODO (ROBOTSIM) change animate to robot simulation, add calculate estimated time of robot travel
 # Maybe make sure aligned vertices are always within the screen
 
-# Documentation
-# p: adds points at your cursor location and creates a new curve
-# e: exports the points on the path to a file
-# space: updates the screen manually
-# r: removes the most recent curve
-# o: adds an obstacle point
-# DELETE: removes an obstacle point
-
 if __name__ == '__main__':
     # Titles the game
-    pygame.display.set_caption('Robotics Splining')
+    pygame.display.set_caption('Spline Generator')
     clock = pygame.time.Clock()
 
     show_segments = True

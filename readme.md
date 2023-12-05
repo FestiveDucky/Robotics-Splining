@@ -2,6 +2,16 @@ Required Python Packages: Pygame, Pillow
 
 The save.txt file stores the saved state of your instance of the spline generator. The first line stores the resolution of your screen so that the points saved can be resized for different sizes, the second line stores the control points of the spline and the last line stores the obstacle points. I reccomend not to touch the obstacle points since they are already set up. In the worst case, there is a backup of the obstacles in the main.py file at the top.
 
+__IMPORTANT__
+-
+The only files you should be really touching are:
+- points.txt: If you want to manually look at the exported point values before being translated and the rotation matrix is applied
+- points.h: The file you are going to move/copy to your auton code
+- constants.py: You can change the two variables at the top of the file
+  - fullscreen: Sets the generator display to be fullscreen, note that you should not have to set this to true and if you do, you might experience problems with alt-tabbing, if your screen turns black, just press SPACE to manually update the screen
+  - precision: Defines the number of points per spline, the more points the more accurate the spline is, but at the same time the slower everything is
+- main.py: The file you are going to run
+
 Guide:
 -
 - Run main.py and create your spline
