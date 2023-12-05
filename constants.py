@@ -3,9 +3,14 @@ from PIL import Image
 from math import *
 import pygame.gfxdraw
 
-pygame.init()
-
+# ====================================
+# THE ONLY VALUES YOU SHOULD CHANGE
+# ====================================
 fullscreen = False
+precision = 100
+# ====================================
+
+pygame.init()
 
 # Automatically resizes everything for you
 ctypes.windll.user32.SetProcessDPIAware()
@@ -34,7 +39,6 @@ FIELD_DIMENSION *= 12
 PPI = HEIGHT / FIELD_DIMENSION
 TRACKWIDTH = 18
 WHEELRADIUS = 1
-precision = 100
 # speed = 0
 speed = 0.005
 

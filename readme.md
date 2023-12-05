@@ -6,8 +6,8 @@ Guide:
 -
 - Run main.py and create your spline
 - Press e to export your points and press s to save your spline for later (if you want)
-- Then run "pointsConverter.py" (I will merge later) and that produces "points.h"
-- Put "points.h" in your auton folder with "skillsAuton.cpp"
+- Open the terminal/console where you ran main.py, and fill out the prompts for about the robot pose, enter the values (default ones are all 0)
+- There should now be a "points.h" file in the same directory as the spline generator move it to your auton folder next to "skillsAuton.cpp"
 - Then just import the file and use the "points" array in your pursuit motion
 
 

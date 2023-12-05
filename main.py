@@ -3,11 +3,12 @@ from obstacles import *
 from drawing import *
 from constants import *
 from random import randint as ri
+
+from pointsConverter import converter
 from robot import *
 
 
 # Obstacles backup: 913 1489 914 305 881 306 883 1492 1210 1491 585 1488 585 1488 585 1517 585 1517 1208 1520 1208 1520 1210 1494 580 278 1211 278 1211 274 1210 307 1209 305 582 306 582 306 583 278 0 1199 295 1203 295 1203 295 595 295 595 0 596 1 294 307 0 1797 306 1489 0 1799 1491 1487 1799 312 1799 1 1493 1503 596 1505 1200 1505 1200 1797 1201 1503 597 1797 593
-# TODO improve point export
 # TODO change obstacles color
 # TODO Add text which notifies of collision (sometimes unknown)
 # TODO (ROBOTSIM) change animate to robot simulation, add calculate estimated time of robot travel
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     pygame.display.set_caption('Robotics Splining')
     clock = pygame.time.Clock()
 
-    show_segments = False
+    show_segments = True
     show_mid_line = False
     draw_lerps = False
     draw_curve = True
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     draw_vectors = False
     draw_bounding_boxes = False
     hide_points = False
-    evenly_spaced = True
+    evenly_spaced = False
     values = [draw_lerps, show_segments, show_mid_line, draw_points, draw_curve, draw_circle, draw_vectors,
               draw_bounding_boxes, hide_points, evenly_spaced]
 
@@ -81,7 +82,6 @@ if __name__ == '__main__':
     # Creating base variables
     FPS = 120
     gameRunning = True
-    counter = 0
     moving_point = None
     mousePos = (0, 0)
 
@@ -236,7 +236,8 @@ if __name__ == '__main__':
 
                         for i in range(len(coordinates)):
                             fout.write(
-                                f"{round((start[0] - coordinates[i][0]) / PPI, 3)} {round((start[1] - coordinates[i][1]) / PPI, 3)} {round(curvatures[i] / PPI, 3)}\n")
+                                f"{round((start[1] - coordinates[i][1]) / PPI, 3)} {round((start[0] - coordinates[i][0]) / PPI, 3)} {round(curvatures[i] / PPI, 3)}\n")
+                    converter()
                 elif e.key == pygame.K_s:
                     # Saves curve and obstacles to a file
                     with open("save.txt", "w") as f:
@@ -260,6 +261,5 @@ if __name__ == '__main__':
                 c.updatePoints()
 
             # gamedisplay.blit(r.move(), r.rect)
-        counter += 1
         # Updating the display
         pygame.display.update()

@@ -1,23 +1,21 @@
-import sys
 import math
-import os
 
-# python3 pointsConverter.py points.txt 0 0 0
-def main():
-    if len(sys.argv) < 5:
-        print("Specify input path")
+
+def converter():
+    # Current angle of the robot
+    try:
+        robotAngle = float(input("Enter robot angle: "))
+
+        # Current position of the robot
+        robotX = float(input("Enter robot x coordinate: "))
+        robotY = float(input("Enter robot y coordinate: "))
+    except ValueError:
+        print("Invalid characters for robot pose!")
         return
 
-    if sys.argv[1] == '-h' or sys.argv[1] == "--help":
-        print("pathFile robotX robotY robotHeading")
-        return
-
-    robotX = float(sys.argv[2])
-    robotY = float(sys.argv[3])
-    robotTheta = float(sys.argv[4]) / 180 * math.pi
-
-    with open(sys.argv[1], "r") as file:
-        with open(sys.argv[1].split(".")[0] + ".h", "w") as output:
+    robotTheta = float(robotAngle) / 180 * math.pi
+    with open("points.txt", "r") as file:
+        with open("points.h", "w") as output:
             output.write("""#pragma once
 
 #ifndef GENERATED_PATH_DEFS
@@ -36,7 +34,7 @@ namespace fttbtkjfk {
     };
 }// namespace fttbtkjfk
 #endif
-inline auto """ + sys.argv[1].split(".")[0] + " = std::to_array<fttbtkjfk::GeneratedPoint>({")
+inline auto points = std::to_array<fttbtkjfk::GeneratedPoint>({""")
 
             count = len(file.readlines())
             file.seek(0)
@@ -46,8 +44,9 @@ inline auto """ + sys.argv[1].split(".")[0] + " = std::to_array<fttbtkjfk::Gener
                 for i in range(len(tokens)):
                     tokens[i] = float(tokens[i])
                 # temporary multiply by -1 because right now, going right is -x
-                x = tokens[1]
-                y = tokens[0]
+                x = tokens[0] + robotX
+                y = tokens[1] + robotY
+
                 curv = tokens[2]
 
                 rotatedX = x * math.cos(-robotTheta) - y * math.sin(-robotTheta)
@@ -64,4 +63,4 @@ inline auto """ + sys.argv[1].split(".")[0] + " = std::to_array<fttbtkjfk::Gener
 
 
 if __name__ == "__main__":
-    main()
+    converter()
