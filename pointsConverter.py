@@ -43,14 +43,16 @@ inline auto points = std::to_array<fttbtkjfk::GeneratedPoint>({""")
                 tokens = line.split(" ")
                 for i in range(len(tokens)):
                     tokens[i] = float(tokens[i])
-                # temporary multiply by -1 because right now, going right is -x
-                x = tokens[0] + robotX
-                y = tokens[1] + robotY
+
+                x = tokens[0]
+                y = tokens[1]
 
                 curv = tokens[2]
 
                 rotatedX = x * math.cos(-robotTheta) - y * math.sin(-robotTheta)
                 rotatedY = x * math.sin(-robotTheta) + y * math.cos(-robotTheta)
+                rotatedX += robotX
+                rotatedY += robotY
 
                 output.write(f"{{.time=0,.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv}}}")
 
