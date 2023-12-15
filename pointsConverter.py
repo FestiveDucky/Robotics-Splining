@@ -1,21 +1,10 @@
-import math
+from constants import *
 
 
-def converter():
-    # Current angle of the robot
-    try:
-        robotAngle = float(input("Enter robot angle: "))
-
-        # Current position of the robot
-        robotX = float(input("Enter robot x coordinate: "))
-        robotY = float(input("Enter robot y coordinate: "))
-    except ValueError:
-        print("Invalid characters for robot pose!")
-        return
-
-    robotTheta = float(robotAngle) / 180 * math.pi
+def converter(robotInfo):
+    robotTheta = float(robotInfo[1]) / 180 * pi
     with open("points.txt", "r") as file:
-        with open("points.h", "w") as output:
+        with open(fr"{PATH_FOR_POINTS_HEADER_FILE_EXPORT}points.h", "w") as output:
             output.write("""#pragma once
 
 #ifndef GENERATED_PATH_DEFS
@@ -49,10 +38,10 @@ inline auto points = std::to_array<fttbtkjfk::GeneratedPoint>({""")
 
                 curv = tokens[2]
 
-                rotatedX = x * math.cos(-robotTheta) - y * math.sin(-robotTheta)
-                rotatedY = x * math.sin(-robotTheta) + y * math.cos(-robotTheta)
-                rotatedX += robotX
-                rotatedY += robotY
+                rotatedX = x * cos(-robotTheta) - y * sin(-robotTheta)
+                rotatedY = x * sin(-robotTheta) + y * cos(-robotTheta)
+                rotatedX += robotInfo[0][0]
+                rotatedY += robotInfo[0][1]
 
                 output.write(f"{{.time=0,.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv}}}")
 

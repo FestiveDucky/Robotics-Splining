@@ -1,5 +1,8 @@
 Required Python Packages: Pygame, Pillow
 
+NOTE THAT THIS README IS OUT OF DATE 
+=
+
 The save.txt file stores the saved state of your instance of the spline generator. The first line stores the resolution of your screen so that the points saved can be resized for different sizes, the second line stores the control points of the spline and the last line stores the obstacle points. I reccomend not to touch the obstacle points since they are already set up. In the worst case, there is a backup of the obstacles in the main.py file at the top.
 
 __IMPORTANT__

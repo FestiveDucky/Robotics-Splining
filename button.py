@@ -1,5 +1,4 @@
-import pygame
-
+from constants import *
 
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, display, text, pos, val, size):
@@ -29,9 +28,3 @@ class Button(pygame.sprite.Sprite):
 
     def set(self, val):
         self.enabled = val
-
-
-ORANGE = (243, 170, 78)
-DARK_BLUE = (17, 24, 32)
-SEMI_DARK_BLUE = (47, 54, 62)
-BLUE = (77, 84, 92)

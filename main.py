@@ -1,4 +1,7 @@
 from itertools import chain
+
+import pygame
+
 from obstacles import *
 from drawing import *
 from constants import *
@@ -13,6 +16,37 @@ from robot import *
 # TODO Add text which notifies of collision (sometimes unknown)
 # TODO (ROBOTSIM) change animate to robot simulation, add calculate estimated time of robot travel
 # Maybe make sure aligned vertices are always within the screen
+
+# TODO make spline tabs have names?
+
+
+def saveSpline(newTab):
+    newRobotData = menu.getRobotValues()
+    splines[splineTab] = [newRobotData[0], newRobotData[1], c.points[:]]
+    with open("save.txt", "w") as f:
+        # We write out the height so that we can rescale the points for different resolutions
+        f.write(str(HEIGHT) + "\n")
+        f.write(" ".join(list(map(str, list(chain.from_iterable(obstaclesPoints))))) + "\n")
+        f.write(f"{newTab} {len(splines)}\n")
+        for spline in splines:
+            f.write(f"{spline[0][0]} {spline[0][1]} {spline[1]}\n")
+            f.write(" ".join(list(map(str, list(chain.from_iterable(spline[2]))))) + "\n")
+
+
+def loadNewSpline():
+    # If new tab, generate new spline data
+    if splineTab > len(splines) - 1:
+        ps = [(HEIGHT * 5 / 32, HEIGHT * 7 / 8), (ri(100, HEIGHT), ri(100, HEIGHT - 100)),
+                  (ri(100, HEIGHT), ri(100, HEIGHT - 100)), (ri(100, HEIGHT), ri(100, HEIGHT - 100))]
+        splines.append([(0, 0), 0, ps])
+
+    # Get rest of spline data
+    ps = splines[splineTab][2]
+    curve = Curve(ps, gamedisplay, precision)
+    menu.setRobotValues((splines[splineTab][0], splines[splineTab][1]))
+    return curve
+
+
 
 if __name__ == '__main__':
     # Titles the game
@@ -36,30 +70,40 @@ if __name__ == '__main__':
     obstaclesPoints = []
     obstacleClasses = []
 
-    points = []
+    splines = []
 
     # Load data from file
     with open("save.txt", "r") as f:
         originalRes = float(f.readline())
-        pointValues = f.readline().split()
-        for i in range(1, len(pointValues), 2):
-            points.append((float(pointValues[i - 1])/originalRes * HEIGHT, float(pointValues[i])/originalRes * HEIGHT))
+        # Load the obstacles
         obstacles = f.readline().split()
         for i in range(1, len(obstacles), 2):
             coord = (float(obstacles[i - 1])/originalRes * HEIGHT, float(obstacles[i])/originalRes * HEIGHT)
             obstaclesPoints.append(coord)
             if len(obstaclesPoints) % 2 == 0:
                 obstacleClasses.append(Obstacle(obstacleGroup, obstaclesPoints[-2], coord))
+        # Read in tab number and number of splines
+        splineTab, numSplines = f.readline().split()
+        splineTab = int(splineTab)
+        numSplines = int(numSplines)
+        for j in range(numSplines):
+            splinePoints = []
 
-    # If no points are loaded, use some random ones
-    if not points:
-        points = [(HEIGHT * 5 / 32, HEIGHT * 7 / 8), (ri(100, HEIGHT), ri(100, HEIGHT - 100)),
-                  (ri(100, HEIGHT), ri(100, HEIGHT - 100)), (ri(100, HEIGHT), ri(100, HEIGHT - 100))]
+            # Read in robot values
+            rx, ry, rangle = f.readline().split()
+
+            # Load all the splines with respective robot values
+            pointValues = f.readline().split()
+            for i in range(1, len(pointValues), 2):
+                splinePoints.append((float(pointValues[i - 1])/originalRes * HEIGHT, float(pointValues[i])/originalRes * HEIGHT))
+
+            splines.append([(float(rx), float(ry)), float(rangle), splinePoints])
 
     # Initialization of classes
-    c = Curve(points, gamedisplay, precision)
     menu = Menu(gamedisplay, WIDTH, HEIGHT, values, (86/288)*HEIGHT)
-    r = Robot(c.points[0])
+    # r = Robot(c.points[0])
+
+    c = loadNewSpline()
 
     # Setting up the display
     gamedisplay.fill((14, 25, 36))
@@ -67,7 +111,7 @@ if __name__ == '__main__':
     c.draw(draw_points, draw_curve, False, 0, False, show_segments, show_mid_line, False, draw_bounding_boxes,
            hide_points, obstacleClasses, evenly_spaced)
     c.updatePoints()
-    menu.draw(c.arcLength)
+    menu.draw(c.arcLength, splineTab)
     obstacleGroup.update(gamedisplay)
     pygame.display.update()
 
@@ -76,7 +120,6 @@ if __name__ == '__main__':
     gameRunning = True
     moving_point = None
     mousePos = (0, 0)
-
     # Starting the game loop
     while gameRunning:
         clock.tick(FPS)
@@ -96,12 +139,18 @@ if __name__ == '__main__':
                     pointsClicked[0].selected = True
                     moving_point = pointsClicked[0]
 
-                buttonsClicked = menu.button_group.get_sprites_at((mousex, mousey))
+                buttonsClicked = menu.getButtonsClicked(mousex, mousey)
                 if len(buttonsClicked) > 0:
                     buttonsClicked[0].pressed()
                     values = menu.getValues()
                     draw_lerps, show_segments, show_mid_line, draw_points, draw_curve, draw_circle, draw_vectors, draw_bounding_boxes, hide_points, evenly_spaced = values
 
+                    update = True
+
+                textBoxesClicked = menu.getTextBoxesClicked(mousex, mousey)
+                if len(textBoxesClicked) > 0:
+                    textBoxesClicked[0].typing(True)
+                    coordinates = textBoxesClicked[0].getTypedValues()
                     update = True
 
             elif e.type == pygame.MOUSEMOTION:
@@ -132,7 +181,6 @@ if __name__ == '__main__':
                 update = True
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_a:
-
                     c.draw(draw_points, draw_curve, draw_lerps, speed, draw_circle, show_segments, show_mid_line,
                            draw_vectors, draw_bounding_boxes, hide_points, obstacleClasses, evenly_spaced)
                     update = True
@@ -150,37 +198,37 @@ if __name__ == '__main__':
                     c.addCurve([point1, point2, mousePos])
                     c.allignSegments(c.point_classes[-3], (0, 0))
                     update = c.setPoints()
-                elif e.key == pygame.K_m:
-                    # Move robot
-                    values = c.draw(False, False, False, 0, False, False, False, False, False,
-                                    False, [], evenly_spaced)
-                    # Prints out stored derivatives
-                    d = []
-                    for curve in c.curves:
-                        d += curve.derivatives[:]
-
-                    # Max derivative 1 x value, ...
-                    md1x, md1y, md2x, md2y = 0, 0, 0, 0
-                    for d1 in d[0]:
-                        md1x = max(md1x, abs(d1[0]))
-                        md1y = max(md1y, abs(d1[1]))
-                    for d2 in d[1]:
-                        md2x = max(md2x, abs(d2[0]))
-                        md2y = max(md2y, abs(d2[1]))
-
-                    if md1x == 0: md1x = 1
-                    if md1y == 0: md1y = 1
-                    if md2x == 0: md2x = 1
-                    if md2y == 0: md2y = 1
-
-                    # Compress them
-                    # for d1 in d[0]:
-                    #     print(round(d1[0] / md1x, 3), round(d1[1] / md1y, 3))
-                    accelerations = []
-                    for d2 in d[1]:
-                        accelerations.append((round(d2[0] / md2x, 3), round(d2[1] / md2y, 3)))
-
-                    r.animate(gamedisplay, 4000, accelerations, values, menu, c)
+                # elif e.key == pygame.K_m:
+                #     # Move robot
+                #     values = c.draw(False, False, False, 0, False, False, False, False, False,
+                #                     False, [], evenly_spaced)
+                #     # Prints out stored derivatives
+                #     d = []
+                #     for curve in c.curves:
+                #         d += curve.derivatives[:]
+                #
+                #     # Max derivative 1 x value, ...
+                #     md1x, md1y, md2x, md2y = 0, 0, 0, 0
+                #     for d1 in d[0]:
+                #         md1x = max(md1x, abs(d1[0]))
+                #         md1y = max(md1y, abs(d1[1]))
+                #     for d2 in d[1]:
+                #         md2x = max(md2x, abs(d2[0]))
+                #         md2y = max(md2y, abs(d2[1]))
+                #
+                #     if md1x == 0: md1x = 1
+                #     if md1y == 0: md1y = 1
+                #     if md2x == 0: md2x = 1
+                #     if md2y == 0: md2y = 1
+                #
+                #     # Compress them
+                #     # for d1 in d[0]:
+                #     #     print(round(d1[0] / md1x, 3), round(d1[1] / md1y, 3))
+                #     accelerations = []
+                #     for d2 in d[1]:
+                #         accelerations.append((round(d2[0] / md2x, 3), round(d2[1] / md2y, 3)))
+                #
+                #     r.animate(gamedisplay, 4000, accelerations, values, menu, c)
 
                 elif e.key == pygame.K_r:
                     c.removeCurve()
@@ -189,20 +237,15 @@ if __name__ == '__main__':
                     speed += 0.01
                 elif e.key == pygame.K_DOWN and speed > 0.01:
                     speed -= 0.01
-                elif e.key == pygame.K_d:
-                    tVal = float(input("Enter a t value: "))
-                    print(
-                        f"Velocity: {c.curves[0].firstDerivative(tVal)}, Acceleration: {c.curves[0].secondDerivative(tVal)}")
-                elif e.key == pygame.K_b:
-                    # TODO make this automatic
-                    # Set the start and ends points of the curve to have a velocity that comes to 0 there
-
-                    # Set second point to first point
-                    c.curves[0].points[1] = c.curves[0].points[0]
-                    c.curves[0].point_classes[1].setCoords(c.curves[0].points[0])
-                    # Set second to last point to last point
-                    c.curves[-1].points[2] = c.curves[-1].points[3]
-                    c.curves[-1].point_classes[2].setCoords(c.curves[-1].points[3])
+                elif e.key == pygame.K_LEFT and splineTab > 0:
+                    saveSpline(splineTab - 1)
+                    splineTab -= 1
+                    c = loadNewSpline()
+                    update = True
+                elif e.key == pygame.K_RIGHT:
+                    saveSpline(splineTab + 1)
+                    splineTab += 1
+                    c = loadNewSpline()
                     update = True
                 elif e.key == pygame.K_SPACE:
                     update = True
@@ -229,14 +272,9 @@ if __name__ == '__main__':
                         for i in range(len(coordinates)):
                             fout.write(
                                 f"{round((start[1] - coordinates[i][1]) / PPI, 3)} {round((start[0] - coordinates[i][0]) / PPI, 3)} {round(curvatures[i] / PPI, 3)}\n")
-                    converter()
+                    converter(menu.getRobotValues())
                 elif e.key == pygame.K_s:
-                    # Saves curve and obstacles to a file
-                    with open("save.txt", "w") as f:
-                        # We write out the height so that we can rescale the points for different resolutions
-                        f.write(str(HEIGHT)+ "\n")
-                        f.write(" ".join(list(map(str, list(chain.from_iterable(c.points))))) + "\n")
-                        f.write(" ".join(list(map(str, list(chain.from_iterable(obstaclesPoints))))))
+                    saveSpline(splineTab)
 
         # Drawing to the screen
         if update:
@@ -246,7 +284,7 @@ if __name__ == '__main__':
 
             c.draw(draw_points, draw_curve, False, 0, False, show_segments, show_mid_line, False, draw_bounding_boxes,
                    hide_points, obstacleClasses, evenly_spaced)
-            menu.draw(c.arcLength)
+            menu.draw(c.arcLength, splineTab)
             obstacleGroup.update(gamedisplay)
 
             if not hide_points:

@@ -1,6 +1,7 @@
 import math
 from constants import *
 from button import *
+from textbox import *
 import pygame, pygame.gfxdraw, time
 
 
@@ -14,7 +15,7 @@ class Point(pygame.sprite.Sprite):
         super().__init__(group)
         self.coords = coords
         self.selected = False
-        self.size = (HEIGHT/72)
+        self.size = (HEIGHT / 72)
         self.rect = pygame.Rect(self.coords[0] - self.size / 2, self.coords[1] - self.size / 2, self.size, self.size)
 
     def update(self, display, special=False):
@@ -459,11 +460,13 @@ class Menu:
         self.buttons = []
         self.display = display
         self.button_group = pygame.sprite.LayeredUpdates()
+        self.text_boxes = []
+        self.text_boxes_group = pygame.sprite.LayeredUpdates()
         self.size = size
         self.w = w
         self.h = h
 
-        spread = self.size / 4
+        spread = self.size / 5
         self.buttons.append(Button(self.button_group, self.display, "Draw Lerps",
                                    (self.w - self.size + 10 * (self.size / 200), len(self.buttons) * spread + 20),
                                    vals[0], self.size))
@@ -500,14 +503,67 @@ class Menu:
         self.arcLengthTextTopLeft = (self.arcLengthTextPos[0] + 20, self.arcLengthTextPos[1])
         # self.arcLengthTextTopLeft = (self.arcLengthTextPos[0] + (self.size / 20) * 4, self.arcLengthTextPos[1] + 7 * (self.size / 200))
 
-    def draw(self, arcLength):
-        pygame.draw.rect(self.display, (34, 45, 56), pygame.Rect(self.w - self.size, 0, self.size, self.h))
+        self.text_boxes.append(TextBox(self.text_boxes_group, self.display, "Robot Pos (x y)",
+                                       (self.w - self.size + 10 * (self.size / 200),
+                                        (len(self.buttons) + 0.5) * spread + 20),
+                                       self.size))
+
+        self.text_boxes.append(TextBox(self.text_boxes_group, self.display, "Robot Angle (deg)",
+                                       (self.w - self.size + 10 * (self.size / 200),
+                                        (len(self.buttons) + 1.4) * spread + 20),
+                                       self.size))
+
+
+        self.tabTextPos = (self.w - self.size + 10 * (self.size / 200), (len(self.buttons) + 2.4) * spread + 20)
+        self.tabTextTopLeft = (self.tabTextPos[0] + 20, self.tabTextPos[1])
+
+    def draw(self, arcLength, splineTab):
+        pygame.draw.rect(self.display, MENU_BACKGROUND_COLOR, pygame.Rect(self.w - self.size, 0, self.size, self.h))
         self.button_group.update()
+        self.text_boxes_group.update()
 
         arcLengthText = self.font.render(f"Path Length: {round(arcLength / PPI, 3)}", True, (240, 240, 240))
         arcLengthTextRect = arcLengthText.get_rect()
         arcLengthTextRect.topleft = self.arcLengthTextTopLeft
         self.display.blit(arcLengthText, arcLengthTextRect)
 
+        tabText = self.font.render(f"Spline Tab: {splineTab}", True, (240, 240, 240))
+        tabTextRect = tabText.get_rect()
+        tabTextRect.topleft = self.tabTextTopLeft
+        self.display.blit(tabText, tabTextRect)
+
     def getValues(self):
         return [b.enabled for b in self.buttons]
+
+    def setRobotValues(self, values):
+        # Setting the position of the bot
+        if values[0] != (0, 0):
+            self.text_boxes[0].setTypedValues(f"{values[0][0]} {values[0][1]}")
+        else:
+            self.text_boxes[0].setTypedValues(self.text_boxes[0].defaultText)
+
+        # Setting the angle of the bot
+        if values[1] != 0:
+            self.text_boxes[1].setTypedValues(f"{values[1]}")
+        else:
+            self.text_boxes[0].setTypedValues(self.text_boxes[1].defaultText)
+
+    def getRobotValues(self):
+        try:
+            separateCoords = self.text_boxes[0].typedText.split()
+            x, y = float(separateCoords[0]), float(separateCoords[1])
+        except ValueError or IndexError:
+            x, y = 0, 0
+
+        try:
+            angle = float(self.text_boxes[1].typedText) % 360
+        except ValueError:
+            angle = 0
+
+        return (x, y), angle
+
+    def getTextBoxesClicked(self, mx, my):
+        return self.text_boxes_group.get_sprites_at((mx, my))
+
+    def getButtonsClicked(self, mx, my):
+        return self.button_group.get_sprites_at((mx, my))

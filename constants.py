@@ -12,6 +12,8 @@ precision = 100
 
 pygame.init()
 
+PATH_FOR_POINTS_HEADER_FILE_EXPORT = ""
+
 # Automatically resizes everything for you
 ctypes.windll.user32.SetProcessDPIAware()
 WIDTH, HEIGHT = pygame.display.list_modes()[0]
@@ -45,7 +47,12 @@ speed = 0.005
 colors = [(217, 15, 73), (182, 158, 60), (13, 192, 128)]
 
 LINE_COLOR = (42, 150, 204)
+MENU_BACKGROUND_COLOR = (34, 45, 56)
 LINE_THICKNESS = HEIGHT/720
+ORANGE = (243, 170, 78)
+DARK_BLUE = (17, 24, 32)
+SEMI_DARK_BLUE = (47, 54, 62)
+BLUE = (77, 84, 92)
 
 
 def pointOnLine(p1, p2, t):
