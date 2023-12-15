@@ -4,7 +4,7 @@ from constants import *
 def converter(robotInfo):
     robotTheta = float(robotInfo[1]) / 180 * pi
     with open("points.txt", "r") as file:
-        with open(fr"{PATH_FOR_POINTS_HEADER_FILE_EXPORT}points.h", "w") as output:
+        with open(fr"{PATH_FOR_POINTS_HEADER_FILE_EXPORT}{robotInfo[2]}.h", "w") as output:
             output.write("""#pragma once
 
 #ifndef GENERATED_PATH_DEFS
@@ -23,7 +23,7 @@ namespace fttbtkjfk {
     };
 }// namespace fttbtkjfk
 #endif
-inline auto points = std::to_array<fttbtkjfk::GeneratedPoint>({""")
+inline auto """ + robotInfo[2] + """ = std::to_array<fttbtkjfk::GeneratedPoint>({""")
 
             count = len(file.readlines())
             file.seek(0)

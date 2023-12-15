@@ -513,8 +513,13 @@ class Menu:
                                         (len(self.buttons) + 1.4) * spread + 20),
                                        self.size))
 
+        self.text_boxes.append(TextBox(self.text_boxes_group, self.display, "Name",
+                                       (self.w - self.size + 10 * (self.size / 200),
+                                        (len(self.buttons) + 2.3) * spread + 20),
+                                       self.size))
 
-        self.tabTextPos = (self.w - self.size + 10 * (self.size / 200), (len(self.buttons) + 2.4) * spread + 20)
+
+        self.tabTextPos = (self.w - self.size + 10 * (self.size / 200), (len(self.buttons) + 3.3) * spread + 20)
         self.tabTextTopLeft = (self.tabTextPos[0] + 20, self.tabTextPos[1])
 
     def draw(self, arcLength, splineTab):
@@ -546,21 +551,26 @@ class Menu:
         if values[1] != 0:
             self.text_boxes[1].setTypedValues(f"{values[1]}")
         else:
-            self.text_boxes[0].setTypedValues(self.text_boxes[1].defaultText)
+            self.text_boxes[1].setTypedValues(self.text_boxes[1].defaultText)
+
+        # Setting the name of the spline
+        self.text_boxes[2].setTypedValues(values[2])
 
     def getRobotValues(self):
         try:
-            separateCoords = self.text_boxes[0].typedText.split()
+            separateCoords = self.text_boxes[0].getTypedValues().split()
             x, y = float(separateCoords[0]), float(separateCoords[1])
         except ValueError or IndexError:
             x, y = 0, 0
 
         try:
-            angle = float(self.text_boxes[1].typedText) % 360
+            angle = float(self.text_boxes[1].getTypedValues()) % 360
         except ValueError:
             angle = 0
 
-        return (x, y), angle
+        name = self.text_boxes[2].getTypedValues()
+
+        return (x, y), angle, name
 
     def getTextBoxesClicked(self, mx, my):
         return self.text_boxes_group.get_sprites_at((mx, my))

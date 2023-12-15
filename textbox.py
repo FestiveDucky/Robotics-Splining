@@ -54,6 +54,8 @@ class TextBox(pygame.sprite.Sprite):
                         if numbersOnly and e.unicode in [".", " ", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8",
                                                          "9"] and len(self.typedText) < 14:
                             self.typedText += e.unicode
+                        elif not numbersOnly:
+                            self.typedText += e.unicode
 
             # Right before loop exits check if we need to change text
             if not self.selected and self.typedText == "":

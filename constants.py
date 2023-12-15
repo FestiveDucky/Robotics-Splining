@@ -12,7 +12,7 @@ precision = 100
 
 pygame.init()
 
-PATH_FOR_POINTS_HEADER_FILE_EXPORT = ""
+PATH_FOR_POINTS_HEADER_FILE_EXPORT = fr"C:\\Users\\alexr\\Documents\\GitHub\\7405K-OvertimeUnderpaid\\src\\autons\\"
 
 # Automatically resizes everything for you
 ctypes.windll.user32.SetProcessDPIAware()

@@ -17,19 +17,17 @@ from robot import *
 # TODO (ROBOTSIM) change animate to robot simulation, add calculate estimated time of robot travel
 # Maybe make sure aligned vertices are always within the screen
 
-# TODO make spline tabs have names?
-
 
 def saveSpline(newTab):
     newRobotData = menu.getRobotValues()
-    splines[splineTab] = [newRobotData[0], newRobotData[1], c.points[:]]
+    splines[splineTab] = [newRobotData[0], newRobotData[1], c.points[:], newRobotData[2]]
     with open("save.txt", "w") as f:
         # We write out the height so that we can rescale the points for different resolutions
         f.write(str(HEIGHT) + "\n")
         f.write(" ".join(list(map(str, list(chain.from_iterable(obstaclesPoints))))) + "\n")
         f.write(f"{newTab} {len(splines)}\n")
         for spline in splines:
-            f.write(f"{spline[0][0]} {spline[0][1]} {spline[1]}\n")
+            f.write(f"{spline[0][0]} {spline[0][1]} {spline[1]} {spline[3]}\n")
             f.write(" ".join(list(map(str, list(chain.from_iterable(spline[2]))))) + "\n")
 
 
@@ -38,12 +36,12 @@ def loadNewSpline():
     if splineTab > len(splines) - 1:
         ps = [(HEIGHT * 5 / 32, HEIGHT * 7 / 8), (ri(100, HEIGHT), ri(100, HEIGHT - 100)),
                   (ri(100, HEIGHT), ri(100, HEIGHT - 100)), (ri(100, HEIGHT), ri(100, HEIGHT - 100))]
-        splines.append([(0, 0), 0, ps])
+        splines.append([(0, 0), 0, ps, f"spline{splineTab}"])
 
     # Get rest of spline data
     ps = splines[splineTab][2]
     curve = Curve(ps, gamedisplay, precision)
-    menu.setRobotValues((splines[splineTab][0], splines[splineTab][1]))
+    menu.setRobotValues((splines[splineTab][0], splines[splineTab][1], splines[splineTab][3]))
     return curve
 
 
@@ -89,15 +87,15 @@ if __name__ == '__main__':
         for j in range(numSplines):
             splinePoints = []
 
-            # Read in robot values
-            rx, ry, rangle = f.readline().split()
+            # Read in robot values and spline name
+            rx, ry, rangle, name = f.readline().split()
 
             # Load all the splines with respective robot values
             pointValues = f.readline().split()
             for i in range(1, len(pointValues), 2):
                 splinePoints.append((float(pointValues[i - 1])/originalRes * HEIGHT, float(pointValues[i])/originalRes * HEIGHT))
 
-            splines.append([(float(rx), float(ry)), float(rangle), splinePoints])
+            splines.append([(float(rx), float(ry)), float(rangle), splinePoints, name])
 
     # Initialization of classes
     menu = Menu(gamedisplay, WIDTH, HEIGHT, values, (86/288)*HEIGHT)
@@ -149,7 +147,10 @@ if __name__ == '__main__':
 
                 textBoxesClicked = menu.getTextBoxesClicked(mousex, mousey)
                 if len(textBoxesClicked) > 0:
-                    textBoxesClicked[0].typing(True)
+                    if textBoxesClicked[0] == menu.text_boxes[2]:
+                        textBoxesClicked[0].typing(False)
+                    else:
+                        textBoxesClicked[0].typing(True)
                     coordinates = textBoxesClicked[0].getTypedValues()
                     update = True
 

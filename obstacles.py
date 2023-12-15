@@ -45,7 +45,7 @@ class Obstacle(pygame.sprite.Sprite):
         return False
 
     def update(self, display):
-        drawThickLine(display, (255, 0, 0), self.p1, self.p2)
+        drawThickLine(display, (255, 120, 0), self.p1, self.p2)
 
 
 if __name__ == '__main__':
