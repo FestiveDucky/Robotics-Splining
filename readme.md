@@ -31,6 +31,12 @@ Controls:
 - s: saves the instance of the generator to the save.txt file
 - e: exports the points and curvatures of the spline to points.txt
 - o: adds an obstacle point
+- t: allows for manual movement of the robot to determine points for autons 
+  - <ins>INSIDE OF THIS MODE</ins>
+  - SPACE: toggles the robot to follow your mouse
+  - p: prints out of robots coords to terminal
+  - LEFT: rotates the robot silhouette left
+  - RIGHT: rotates the robot silhouette right
 - DELETE: removes an obstacle point
 - SPACE: Manually updates the screen
 

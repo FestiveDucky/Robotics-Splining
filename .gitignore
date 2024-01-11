@@ -1,0 +1,11 @@
+
+__pycache__/textbox.cpython-311.pyc.2469501904208
+__pycache__/textbox.cpython-311.pyc
+__pycache__/robot.cpython-311.pyc
+__pycache__/pointsConverter.cpython-311.pyc
+__pycache__/obstacles.cpython-311.pyc
+__pycache__/drawing.cpython-311.pyc
+__pycache__/constants.cpython-311.pyc
+__pycache__/button.cpython-311.pyc
+*.pyc
+points.txt

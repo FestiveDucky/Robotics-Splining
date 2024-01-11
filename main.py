@@ -99,9 +99,9 @@ if __name__ == '__main__':
 
     # Initialization of classes
     menu = Menu(gamedisplay, WIDTH, HEIGHT, values, (86/288)*HEIGHT)
-    # r = Robot(c.points[0])
-
     c = loadNewSpline()
+
+    r = Robot(c.points[0])
 
     # Setting up the display
     gamedisplay.fill((14, 25, 36))
@@ -171,8 +171,6 @@ if __name__ == '__main__':
                     else:
                         c.allignSegments(moving_point, vector)
                     update = c.setPoints()
-
-
             elif e.type == pygame.MOUSEBUTTONUP:
                 if moving_point is not None:
                     moving_point.selected = False
@@ -184,6 +182,9 @@ if __name__ == '__main__':
                 if e.key == pygame.K_a:
                     c.draw(draw_points, draw_curve, draw_lerps, speed, draw_circle, show_segments, show_mid_line,
                            draw_vectors, draw_bounding_boxes, hide_points, obstacleClasses, evenly_spaced)
+                    update = True
+                elif e.key == pygame.K_t:
+                    r.manualMove(c.points[0], )
                     update = True
                 elif e.key == pygame.K_p and mousePos[0] < HEIGHT and mousePos[1] < HEIGHT:
                     midpoint = ((mousePos[0] + c.points[-1][0]) / 2, (mousePos[1] + c.points[-1][1]) / 2)
