@@ -3,7 +3,6 @@ import pygame.sprite
 from constants import *
 
 
-# TODO make obstacles be saved to file and load/update file automatically, ignore last obstacle if we have odd number
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, group, p1, p2):
         super().__init__(group)
