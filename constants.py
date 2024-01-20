@@ -12,7 +12,7 @@ precision = 100
 
 pygame.init()
 
-PATH_FOR_POINTS_HEADER_FILE_EXPORT = fr"C:\\Users\\alexr\\Documents\\GitHub\\7405K-OvertimeUnderpaid\\src\\autons\\"
+PATH_FOR_POINTS_HEADER_FILE_EXPORT = fr""
 
 # Automatically resizes everything for you
 ctypes.windll.user32.SetProcessDPIAware()
@@ -48,6 +48,7 @@ speed = 0.005
 colors = [(217, 15, 73), (182, 158, 60), (13, 192, 128)]
 
 LINE_COLOR = (42, 150, 204)
+REVERSED_LINE_COLOR = (255, 86, 92)
 MENU_BACKGROUND_COLOR = (34, 45, 56)
 LINE_THICKNESS = HEIGHT/720
 ORANGE = (243, 170, 78)

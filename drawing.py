@@ -36,12 +36,14 @@ class Point(pygame.sprite.Sprite):
 
 
 class CubicBezierCurve:
-    def __init__(self, points, display):
+    def __init__(self, points, display, line=False, reversed=False):
         assert len(points) == 4
         self.points = []
         self.display = display
+        self.isLine = line
         self.point_group = pygame.sprite.LayeredUpdates()
         self.point_classes = points
+        self.reversed = reversed
         self.arcLength = 0
         # First, Second
         self.data = {"t": [], "points": [], "firstDerivatives": [], "secondDerivatives": [], "curvatures": [],
@@ -49,6 +51,9 @@ class CubicBezierCurve:
         self.collidesWithObstacles = False
 
         self.setNewPoints()
+
+    def toggleDirection(self):
+        self.reversed = not self.reversed
 
     def drawLerps(self, t, points, drawLines, total_points, animation):
         new_points = []
@@ -122,7 +127,7 @@ class CubicBezierCurve:
                 drawThickLine(self.display, (134, 30, 63), p, p5)
 
             # Determines if the line is too close to obstacles which would cause the bot to hit them
-            color = LINE_COLOR
+            color = LINE_COLOR if not self.reversed else REVERSED_LINE_COLOR
             for obstacle in obstacles:
                 if obstacle.calculateIntersection(p4, p5):
                     color = (255, 255, 0)
@@ -172,8 +177,14 @@ class CubicBezierCurve:
             p4 = (-d1[1] + p[0], d1[0] + p[1])
             p5 = (d1[1] + p[0], -d1[0] + p[1])
             # Length of vector
-            d11 = (TRACKWIDTH * PPI) / (math.dist(p, p4) * 2)
-            d22 = (TRACKWIDTH * PPI) / (math.dist(p, p5) * 2)
+            if math.dist(p, p4) == 0:
+                d11 = 0
+            else:
+                d11 = (TRACKWIDTH * PPI) / (math.dist(p, p4) * 2)
+            if math.dist(p, p5) == 0:
+                d22 = 0
+            else:
+                d22 = (TRACKWIDTH * PPI) / (math.dist(p, p5) * 2)
             # Endpoints of normal vectors
             p4 = ((1 - d11) * p[0] + d11 * p4[0], (1 - d11) * p[1] + d11 * p4[1])
             p5 = ((1 - d22) * p[0] + d22 * p5[0], (1 - d22) * p[1] + d22 * p5[1])
@@ -246,9 +257,9 @@ class CubicBezierCurve:
             numerator = abs(numerator)
         denominator = ((f[0] ** 2) + (f[1] ** 2)) ** (1.5)
         if denominator == 0 or numerator == 0:
-            print("Undefined Curvature (A line)")
+            pass
+            # print("Undefined Curvature (A line)")
         else:
-
             k = numerator / denominator
             if flip:
                 return -(1. / k)
@@ -288,7 +299,7 @@ class CubicBezierCurve:
             return pygame.Rect(xBounds[1], yBounds[1], xBounds[0] - xBounds[1], yBounds[0] - yBounds[1])
 
         if draw:
-            pygame.draw.rect(self.display, (150, 150, 150),
+            pygame.draw.rect(self.display, (0, 0, 0),
                              pygame.Rect(xBounds[1], yBounds[1], xBounds[0] - xBounds[1], yBounds[0] - yBounds[1]), 1)
         else:
             return xBounds + yBounds
@@ -302,21 +313,20 @@ class CubicBezierCurve:
 
 
 class Curve:
-    def __init__(self, points, display, precision):
-        assert len(points) >= 4
-        self.points = points
+    def __init__(self, points, display, precision, lines, reversedCurves):
+        self.points = [points[0]]
         self.precision = precision
         self.point_group = pygame.sprite.LayeredUpdates()
         self.point_classes = []
         self.curves = []
-        for i in range(len(points)):
-            self.point_classes.append(Point(points[i], self.point_group))
-            if i % 3 == 0 and i != 0:
-                self.curves.append(CubicBezierCurve(
-                    [self.point_classes[i - 3], self.point_classes[i - 2], self.point_classes[i - 1],
-                     self.point_classes[i]], display))
         self.display = display
         self.arcLength = 0
+
+        self.point_classes.append(Point(points[0], self.point_group))
+        # print(len(points), len(points)//3)
+        for i in range(1, len(points)//3 + 1):
+            # print([points[i * 3 - 2], points[i * 3 - 1], points[i * 3]], lines[i - 1])
+            self.addCurve([points[i * 3 - 2], points[i * 3 - 1], points[i * 3]], lines[i - 1], reversedCurves[i - 1])
 
     """Recalculates all curve values including arc length"""
 
@@ -383,17 +393,29 @@ class Curve:
         if i % 3 == 1 and i != 1:
             otherP = self.point_classes[i - 2]
             centerP = self.point_classes[i - 1]
+            # Ignore alignment of lines
+            if self.curves[(i - 2) // 3].isLine:
+                return
         elif i % 3 == 2 and i != len(self.point_classes) - 2:
             otherP = self.point_classes[i + 2]
             centerP = self.point_classes[i + 1]
-        elif i % 3 == 0 and i != 0 and i != len(self.point_classes) - 1:
-            # TODO make movement be blocked by poinst going off the screen
-            c = self.point_classes[i - 1].getCoords()
-            self.point_classes[i - 1].setCoords((c[0] + move[0], c[1] + move[1]))
-            c = self.point_classes[i + 1].getCoords()
-            self.point_classes[i + 1].setCoords((c[0] + move[0], c[1] + move[1]))
+            # Ignore alignment of lines
+            if self.curves[(i + 2) // 3].isLine:
+                return
+        elif i % 3 == 0:
+            # TODO make movement be blocked by points going off the screen
+            if i != 0:
+                c = self.point_classes[i - 1].getCoords()
+                self.point_classes[i - 1].setCoords((c[0] + move[0], c[1] + move[1]))
+            if i != len(self.point_classes) - 1:
+                c = self.point_classes[i + 1].getCoords()
+                self.point_classes[i + 1].setCoords((c[0] + move[0], c[1] + move[1]))
             return
         else:
+            return
+
+        # Ignore alignment of lines
+        if self.curves[i // 3].isLine:
             return
 
         # d = -math.dist(otherP.getCoords(), centerP.getCoords()) / math.dist(p.getCoords(), centerP.getCoords())
@@ -426,24 +448,27 @@ class Curve:
     def getPointsClicked(self, mx, my):
         return self.point_group.get_sprites_at((mx, my))
 
-    def addCurve(self, points):
+    def addCurve(self, points, line=False, reversed=False):
         assert len(points) == 3
-        for p in points:
+        for i, p in enumerate(points):
             self.point_classes.append(Point(p, self.point_group))
+            if line and (i + 1) % 3 != 0:
+                self.point_group.remove(self.point_classes[-1])
         self.points += points
         self.curves.append(CubicBezierCurve(
             [self.point_classes[-4], self.point_classes[-3], self.point_classes[-2], self.point_classes[-1]],
-            self.display))
+            self.display, line, reversed))
 
     def removeCurve(self):
-        if len(self.curves) > 1:
-            self.arcLength -= self.curves[-1].arcLength
-            self.curves.pop()
-            self.point_group.remove(self.point_classes[-1])
-            self.point_group.remove(self.point_classes[-2])
-            self.point_group.remove(self.point_classes[-3])
-            self.point_classes = self.point_classes[:-3]
-            self.points = self.points[:-3]
+        if len(self.curves) == 0:
+            return
+        self.arcLength -= self.curves[-1].arcLength
+        self.curves.pop()
+        self.point_group.remove(self.point_classes[-1])
+        self.point_group.remove(self.point_classes[-2])
+        self.point_group.remove(self.point_classes[-3])
+        self.point_classes = self.point_classes[:-3]
+        self.points = self.points[:-3]
 
     def setPoints(self):
         self.points = [point.getCoords() for point in self.point_classes]
@@ -497,6 +522,10 @@ class Menu:
         self.buttons.append(Button(self.button_group, self.display, "Equidistant Points",
                                    (self.w - self.size + 10 * (self.size / 200), len(self.buttons) * spread + 20),
                                    vals[9], self.size))
+
+        self.buttons.append(Button(self.button_group, self.display, "Generate Auton",
+                                   (self.w - self.size + 10 * (self.size / 200), len(self.buttons) * spread + 20),
+                                   vals[10], self.size))
 
         self.font = pygame.font.Font('freesansbold.ttf', int(16 * (self.size / 200)))
         self.arcLengthTextPos = (self.w - self.size + 10 * (self.size / 200), len(self.buttons) * spread + 20)
