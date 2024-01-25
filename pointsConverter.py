@@ -58,13 +58,13 @@ def converter(robotInfo, splineData, points, updateSplinesOnly=False):
 namespace fttbtkjfk {
     struct GeneratedPoint {
         double time;
-        struct {
+        
+        xstruct {
             double x, y, heading;
         } pose;
-        struct {
-            double left, right;
-        } wheelVels;
-        double vel, accel, curv;
+        
+        double vel;
+        double curv;
         int event;
     };
 }// namespace fttbtkjfk
@@ -87,7 +87,8 @@ inline auto """ + robotInfo[2] + f"_spline{i + 1}" + """ = std::to_array<fttbtkj
                     if p == events[currentEvent][0]:
                         event = events.pop(currentEvent)[1]
 
-                output.write(f"{{.time=0,.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv}}},.event={event}")
+                points[p] = (rotatedX, rotatedY)
+                output.write(f"{{.time=0,.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv},.event={event}}}")
 
                 if p < end - 1:
                     output.write(",")
@@ -158,7 +159,7 @@ void """ + robotInfo[2] + """Auton() {
                 while events and events[0][0] <= endPointIndex:
                     fout.write(translateEvent(events.pop(0)[1]))
 
-            elif i != 0 and splineData[5][i - 1]:
+            elif (i != 0 and splineData[5][i - 1]) or i == 0:
                 splineIndex += 1
                 # We turn robot to point that is at the beginning of the spline
                 # (we choose point 15% of the way along the first curve (kinda arbitrary)
