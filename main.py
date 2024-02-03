@@ -11,9 +11,7 @@ from robot import *
 # Obstacles backup: 913 1489 914 305 881 306 883 1492 1210 1491 585 1488 585 1488 585 1517 585 1517 1208 1520 1208 1520 1210 1494 580 278 1211 278 1211 274 1210 307 1209 305 582 306 582 306 583 278 0 1199 295 1203 295 1203 295 595 295 595 0 596 1 294 307 0 1797 306 1489 0 1799 1491 1487 1799 312 1799 1 1493 1503 596 1505 1200 1505 1200 1797 1201 1503 597 1797 593
 # TODO make sure aligned vertices are always within the screen
 # TODO make menu settings be saved
-
-# TODO add turning to splines so that the bot is facing the right direction when starting splines.
-
+# add ability to have back to back independent splines
 
 def saveSpline(newTab):
     newRobotData = menu.getRobotValues()
@@ -234,7 +232,7 @@ if __name__ == '__main__':
                         dist = math.dist(splinePoint, mousePos)
                         if dist < nearestPoint[1]:
                             nearestPoint = [splinePoint, dist, i]
-                    c.curves[nearestPoint[2]//precision].toggleDirection()
+                    c.curves[nearestPoint[2]//(precision + 1)].toggleDirection()
                     update = True
 
                 elif e.key == pygame.K_0 and len(robotEventClasses) != 0:
