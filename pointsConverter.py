@@ -57,15 +57,11 @@ def converter(robotInfo, splineData, points, updateSplinesOnly=False):
 #include <array>
 namespace fttbtkjfk {
     struct GeneratedPoint {
-        double time;
-        
-        xstruct {
-            double x, y, heading;
+        struct {
+            double x, y;
         } pose;
         
-        double vel;
         double curv;
-        int event;
     };
 }// namespace fttbtkjfk
 #endif
@@ -77,10 +73,13 @@ inline auto """ + robotInfo[2] + f"_spline{i + 1}" + """ = std::to_array<fttbtkj
 
                 curv = points[p][2]
 
-                rotatedX = x * cos(-robotTheta) - y * sin(-robotTheta)
-                rotatedY = x * sin(-robotTheta) + y * cos(-robotTheta)
-                rotatedX += robotInfo[0][0]
-                rotatedY += robotInfo[0][1]
+                # rotatedX = x * cos(-robotTheta) - y * sin(-robotTheta)
+                # rotatedY = x * sin(-robotTheta) + y * cos(-robotTheta)
+                # rotatedX += robotInfo[0][0]
+                # rotatedY += robotInfo[0][1]
+
+		rotatedX = (-1 * x * cos(robotTheta) - -1 * y * sin(robotTheta)) + robotInfo[0][0]
+		rotatedY = -1 * x * sin(robotTheta) + -1 * y * cos(robotTheta) + robotInfo[0][1]
 
                 event = 0
                 if events and currentEvent < len(events):
@@ -88,7 +87,8 @@ inline auto """ + robotInfo[2] + f"_spline{i + 1}" + """ = std::to_array<fttbtkj
                         event = events.pop(currentEvent)[1]
 
                 points[p] = (rotatedX, rotatedY)
-                output.write(f"{{.time=0,.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv},.event={event}}}")
+	    	output.write(f"{{.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv}}}")
+                # output.write(f"{{.time=0,.pose={{.x={rotatedX},.y={rotatedY}}},.curv={1 / curv},.event={event}}}")
 
                 if p < end - 1:
                     output.write(",")
